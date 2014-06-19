@@ -25,7 +25,7 @@ class File {
 
 		fseek($fh, -1, SEEK_CUR);
 		do {
-			$c = fgetrc($fh);
+			$c = self::fgetrc($fh);
 		} while($c !== "\n" && $c !== FALSE);
 		if ($c === "\n") {
 			fseek($fh, 1, SEEK_CUR);
@@ -36,42 +36,3 @@ class File {
 		return $str;
 	}
 }
-
-/*
-// Byte position to start reading from.
-// Passing in -1 will always go to the bottom of the file.
-$pos = isset($_GET['p']) ? (int)$_GET['p'] : 0;
-
-// Number of lines to return
-$limit = isset($_GET['l']) ? (int)$_GET['l'] : 24;
-
-$data = [];
-
-if ($pos === -1) {
-	// Since we're at the bottom of the file, work backwards
-	fseek($fh, 0, SEEK_END);
-
-	while (($row = fgetrs($fh)) && $limit--) {
-		$pos = ftell($fh);
-		$data[$pos] = $row;
-	}
-} else {
-	// Start at an absolute position
-	fseek($fh, $pos, SEEK_SET);
-
-	// Work backwards until we find a newline
-	do {
-		$c = fgetrc($fh);
-	} while($c !== "\n" && $c !== FALSE);
-
-	// Point at the first character past the newline
-	fseek($fh, 1, SEEK_CUR);
-
-	// Read a set number of lines
-	while (($row = fgets($fh)) && $limit--) {
-		$data[$pos] = $row;
-		$pos = ftell($fh);
-	}
-}
-
-*/

@@ -3,8 +3,10 @@
 {% block content %}
 <h2>Viewing {{ filename }}</h2>
 <pre>
-{% for line in filedata %}
-{{ line }}
-{% endfor %}
+{% for line in filedata %}{{ line }}{% endfor %}
 </pre>
+<a href="?p=0">Top</a>
+<a href="?p={{ prevbyte }}">Prev</a>
+<a href="?p={{ nextbyte }}">Next</a>
+<a href="?p=-1">Bottom</a>
 {% endblock %}
