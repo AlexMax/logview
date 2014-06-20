@@ -1,0 +1,25 @@
+body {
+	background-color:#3f3f3f;
+	color:#dcdccc;
+}
+a {
+	color:#8cd0d3;
+	text-decoration:none;
+}
+th {
+	color:#dfdfbf;
+	font-weight:bold;
+}
+td.file {
+	padding-right:1em;
+}
+td.mtime {
+	text-align:right;
+}
+td.size {
+	padding-left:1em;
+	text-align:right;
+}
+.bottom {
+	border-bottom:1px #cc9393 solid;
+}

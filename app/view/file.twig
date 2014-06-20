@@ -2,11 +2,12 @@
 
 {% block content %}
 <h2>Viewing {{ filename }}</h2>
-<pre>
+<pre class="logfile {{ logclass }}">
 {% for line in filedata %}{{ line }}{% endfor %}
 </pre>
-<a href="?p=0">Top</a>
-<a href="?p={{ prevbyte }}">Prev</a>
-<a href="?p={{ nextbyte }}">Next</a>
-<a href="?p=-1">Bottom</a>
+<a class="pure-button" href="/">Back to List</a>
+<a class="pure-button" href="?p=0&d=asc&l={{ limit }}">Top</a>
+<a class="pure-button" href="?p={{ prevbyte }}&d=desc&l={{ limit }}">PgUp</a>
+<a class="pure-button" href="?p={{ nextbyte }}&d=asc&l={{ limit }}">PgDn</a>
+<a class="pure-button" href="?p=bot&d=desc&l={{ limit }}">Bottom</a>
 {% endblock %}

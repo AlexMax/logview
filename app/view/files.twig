@@ -10,9 +10,9 @@
 	</tr>
 	{% for file, info in files %}
 	<tr>
-		<td><a href="/files/{{ file }}">{{ file }}</a></td>
-		<td>{{ info.mtime|date("M j, Y H:i:s") }}</td>
-		<td>{{ info.size|bytesize }}</td>
+		<td class="file"><a href="/files/{{ file }}">{{ file }}</a></td>
+		<td class="mtime">{{ info.mtime|date("M j, Y H:i:s") }}</td>
+		<td class="size">{{ info.size|bytesize }}</td>
 	</tr>
 	{% endfor %}
 </ul>

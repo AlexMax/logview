@@ -49,38 +49,80 @@ $app->get('/files/{filename}', function(Request $req, $filename) use ($app) {
 		$app->abort(404, "Attempted directory traversal");
 	}
 
-	$position = (int)$req->query->get('p', -1);
+	$p = $req->query->get('p', 'bot');
 	$limit = (int)$req->query->get('l', 24);
+	$direction = strtolower($req->query->get('d', 'desc'));
+
+	$logclasses = [];
+	if ($p === 'bot') {
+		$bottom = true;
+		$position = 0;
+		$logclass = 'bottom';
+	} else {
+		$bottom = false;
+		$position = (int)$p;
+		$logclass = '';
+	}
+
+	// Limit the amount of lines to something reasonable
+	if ($limit > 100) {
+		$app->abort(400, "Too many lines");
+	}
+
+	// Don't allow out-of-bounds reads
+	$filesize = filesize($filename);
+	if ($position > $filesize || $position < 0) {
+		$app->abort(400, "Out of bounds");
+	}
 
 	$filedata = [];
-	$fh = fopen($filename, 'r');
-	if ($position === -1) {
-		// Since we're at the bottom of the file, work backwards
+	$fh = fopen($filename, 'rb');
+
+	if ($bottom) {
+		// Go to the end of the file
 		fseek($fh, 0, SEEK_END);
 
-		while (($row = File::fgetrs($fh)) && $limit--) {
-			$position = ftell($fh);
-			$filedata[$position] = $row;
-		}
-
-		$filedata = array_reverse($filedata, true);
+		// Our "real" position is in absolute bytes
+		$position = ftell($fh);
 	} else {
 		// Start at an absolute position
 		fseek($fh, $position, SEEK_SET);
+	}
 
+	if ($direction === 'asc') {
 		// Work backwards until we find a newline
 		do {
 			$c = File::fgetrc($fh);
 		} while ($c !== "\n" && $c !== FALSE);
 
 		// Point at the first character past the newline
-		fseek($fh, 1, SEEK_CUR);
+		if ($c === "\n") {
+			fseek($fh, 1, SEEK_CUR);
+		}
 
 		// Read a set number of lines
-		while (($row = fgets($fh)) && $limit--) {
+		$position = ftell($fh);
+		$linecount = $limit;
+		while (($row = fgets($fh)) && $linecount--) {
 			$filedata[$position] = $row;
 			$position = ftell($fh);
 		}
+	} elseif ($direction === 'desc') {
+		// Work forwards until we find a newline
+		do {
+			$c = fgetc($fh);
+		} while ($c !== "\n" && $c !== FALSE);
+
+		// Read a set number of lines backwards
+		$linecount = $limit;
+		while (($row = File::fgetrs($fh)) && $linecount--) {
+			$position = ftell($fh);
+			$filedata[$position] = $row;
+		}
+
+		$filedata = array_reverse($filedata, true);
+	} else {
+		$app->abort(400, "Invalid direction");
 	}
 
 	// Create the next and previous byte positions
@@ -91,6 +133,8 @@ $app->get('/files/{filename}', function(Request $req, $filename) use ($app) {
 		'filedata' => $filedata,
 		'prevbyte' => $bytes[0],
 		'nextbyte' => $bytes[count($bytes) - 1],
+		'limit' => $limit,
+		'logclass' => $logclass,
 	];
 
 	return $app['twig']->render('file.twig', $context);
